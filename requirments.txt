@@ -1,0 +1,16 @@
+# Core
+pandas
+numpy
+scikit-learn
+
+# Twitter API
+tweepy
+
+# App
+streamlit
+
+# Visualization
+matplotlib
+
+# Model saving
+joblib
