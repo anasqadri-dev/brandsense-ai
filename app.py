@@ -248,6 +248,27 @@ if not df.empty:
 else:
     st.info("No tweets to display")
 
+#users can export data for analysis
+# -----------------------------
+# DOWNLOAD BUTTON
+# -----------------------------
+st.markdown("---")
+st.subheader("📥 Export Data")
+
+if not df.empty:
+    df_filtered = df.copy()
+    if selected_brand != "All" and "brand" in df.columns:
+        df_filtered = df_filtered[df_filtered["brand"] == selected_brand]
+    
+    csv = df_filtered.to_csv(index=False).encode('utf-8')
+    st.download_button(
+        label="📊 Download Filtered Data as CSV",
+        data=csv,
+        file_name=f"brandsense_data_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
+        mime="text/csv",
+        use_container_width=True
+    )
+
 # -----------------------------
 # FOOTER
 # -----------------------------
