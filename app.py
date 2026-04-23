@@ -12,6 +12,7 @@ import re
 from datetime import datetime
 import os
 import sys
+from src.insights import get_top_keywords, detect_emotions
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "src")))
 from preprocess import clean_text
@@ -274,6 +275,73 @@ if not df.empty:
         )
 else:
     st.info("No tweets to display")
+
+
+# -----------------------------
+# KEYWORD INSIGHTS
+# -----------------------------
+st.markdown("---")
+st.subheader("🔍 Keyword Insights")
+
+if not df.empty and "sentiment" in df.columns:
+    df_filtered = df.copy()
+    if selected_brand != "All" and "brand" in df.columns:
+        df_filtered = df_filtered[df_filtered["brand"] == selected_brand]
+
+    col_k1, col_k2 = st.columns(2)
+
+    # ❌ Negative keywords
+    with col_k1:
+        st.markdown("### ❌ Top Complaints")
+
+        neg_words = get_top_keywords(df_filtered, "negative")
+
+        if neg_words:
+            for word, count in neg_words:
+                st.write(f"🔴 {word} ({count})")
+        else:
+            st.info("No negative data")
+
+    # ✅ Positive keywords
+    with col_k2:
+        st.markdown("### ✅ Top Praises")
+
+        pos_words = get_top_keywords(df_filtered, "positive")
+
+        if pos_words:
+            for word, count in pos_words:
+                st.write(f"🟢 {word} ({count})")
+        else:
+            st.info("No positive data")
+
+    # -----------------------------
+    # EMOTION ANALYSIS
+    # -----------------------------
+    st.markdown("### 😊 Emotion Analysis")
+
+    emotions = detect_emotions(df_filtered)
+
+    if emotions:
+        import plotly.express as px
+
+        fig = px.bar(
+            x=list(emotions.keys()),
+            y=list(emotions.values()),
+            title="Emotion Distribution"
+        )
+        st.plotly_chart(fig, use_container_width=True)
+    else:
+        st.info("No emotions detected")
+
+    # -----------------------------
+    # SMART INSIGHT
+    # -----------------------------
+    if neg_words:
+        top_issue = neg_words[0][0]
+        st.info(f"🧠 Insight: Most complaints are about '{top_issue}'.")
+else:
+    st.info("No data available for insights")
+
 
 # users can export data for analysis
 #users can export data for analysis
