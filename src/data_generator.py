@@ -47,3 +47,6 @@ def generate_data(n=500):
     df.to_csv("data/tweets.csv", index=False)
 
     print("✅ Synthetic data generated successfully!")
+
+if __name__ == "__main__":
+    generate_data(500)
