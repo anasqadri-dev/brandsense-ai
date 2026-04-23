@@ -10,6 +10,11 @@ import matplotlib.pyplot as plt
 import plotly.express as px
 import re
 from datetime import datetime
+import os
+import sys
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "src")))
+from preprocess import clean_text
 
 # Page config
 st.set_page_config(

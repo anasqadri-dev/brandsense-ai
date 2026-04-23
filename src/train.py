@@ -4,18 +4,16 @@ import joblib
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import accuracy_score
+from sklearn.metrics import accuracy_score, classification_report
 
-from preprocess import clean_text
+from src.preprocess import clean_text
 
 # -----------------------------
 # 1. LOAD DATA
 # -----------------------------
 df = pd.read_csv("data/tweets.csv")
 
-# If synthetic data already has sentiment column → OK
-# If not, we create simple labels
-
+# If no sentiment column → create simple labels
 if "sentiment" not in df.columns:
     def simple_label(text):
         text = text.lower()
@@ -43,7 +41,7 @@ y = df["sentiment"]
 # 4. TRAIN / TEST SPLIT
 # -----------------------------
 X_train, X_test, y_train, y_test = train_test_split(
-    X, y, test_size=0.2
+    X, y, test_size=0.2, random_state=42
 )
 
 # -----------------------------
@@ -59,6 +57,8 @@ preds = model.predict(X_test)
 acc = accuracy_score(y_test, preds)
 
 print(f"\n✅ Model Accuracy: {acc:.2f}")
+print("\n📊 Classification Report:")
+print(classification_report(y_test, preds))
 
 # -----------------------------
 # 7. SAVE MODEL
