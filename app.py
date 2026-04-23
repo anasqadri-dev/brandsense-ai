@@ -13,6 +13,7 @@ from datetime import datetime
 import os
 import sys
 from src.insights import get_top_keywords, detect_emotions
+from src.brand_analysis import calculate_brand_scores
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "src")))
 from preprocess import clean_text
@@ -342,6 +343,57 @@ if not df.empty and "sentiment" in df.columns:
 else:
     st.info("No data available for insights")
 
+# -----------------------------
+# BRAND COMPARISON SCORE
+# -----------------------------
+st.markdown("---")
+st.subheader("🏆 Brand Comparison Score")
+
+if not df.empty:
+
+    df_filtered = df.copy()
+    if selected_brand != "All" and "brand" in df.columns:
+        df_filtered = df_filtered[df_filtered["brand"] == selected_brand]
+
+    score_df = calculate_brand_scores(df_filtered)
+
+    if not score_df.empty:
+
+        # -----------------------------
+        # TABLE VIEW
+        # -----------------------------
+        st.dataframe(score_df, use_container_width=True)
+
+        # -----------------------------
+        # BAR CHART
+        # -----------------------------
+        import plotly.express as px
+
+        fig = px.bar(
+            score_df,
+            x="brand",
+            y="score",
+            color="score",
+            color_continuous_scale="RdYlGn",
+            title="Brand Sentiment Score Comparison"
+        )
+
+        st.plotly_chart(fig, use_container_width=True)
+
+        # -----------------------------
+        # INSIGHTS
+        # -----------------------------
+        best = score_df.iloc[0]
+        worst = score_df.iloc[-1]
+
+        st.success(f"🏆 Best Brand: {best['brand']} ({best['score']}%)")
+        st.error(f"⚠️ Worst Brand: {worst['brand']} ({worst['score']}%)")
+
+    else:
+        st.info("Not enough data for comparison")
+
+else:
+    st.warning("No data available")
 
 # users can export data for analysis
 #users can export data for analysis
