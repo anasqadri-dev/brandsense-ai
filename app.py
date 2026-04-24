@@ -10,6 +10,13 @@ import matplotlib.pyplot as plt
 import plotly.express as px
 import re
 from datetime import datetime
+import os
+import sys
+from src.insights import get_top_keywords, detect_emotions
+from src.brand_analysis import calculate_brand_scores
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "src")))
+from preprocess import clean_text
 
 # Page config
 st.set_page_config(
@@ -269,6 +276,124 @@ if not df.empty:
         )
 else:
     st.info("No tweets to display")
+
+
+# -----------------------------
+# KEYWORD INSIGHTS
+# -----------------------------
+st.markdown("---")
+st.subheader("🔍 Keyword Insights")
+
+if not df.empty and "sentiment" in df.columns:
+    df_filtered = df.copy()
+    if selected_brand != "All" and "brand" in df.columns:
+        df_filtered = df_filtered[df_filtered["brand"] == selected_brand]
+
+    col_k1, col_k2 = st.columns(2)
+
+    # ❌ Negative keywords
+    with col_k1:
+        st.markdown("### ❌ Top Complaints")
+
+        neg_words = get_top_keywords(df_filtered, "negative")
+
+        if neg_words:
+            for word, count in neg_words:
+                st.write(f"🔴 {word} ({count})")
+        else:
+            st.info("No negative data")
+
+    # ✅ Positive keywords
+    with col_k2:
+        st.markdown("### ✅ Top Praises")
+
+        pos_words = get_top_keywords(df_filtered, "positive")
+
+        if pos_words:
+            for word, count in pos_words:
+                st.write(f"🟢 {word} ({count})")
+        else:
+            st.info("No positive data")
+
+    # -----------------------------
+    # EMOTION ANALYSIS
+    # -----------------------------
+    st.markdown("### 😊 Emotion Analysis")
+
+    emotions = detect_emotions(df_filtered)
+
+    if emotions:
+        import plotly.express as px
+
+        fig = px.bar(
+            x=list(emotions.keys()),
+            y=list(emotions.values()),
+            title="Emotion Distribution"
+        )
+        st.plotly_chart(fig, use_container_width=True)
+    else:
+        st.info("No emotions detected")
+
+    # -----------------------------
+    # SMART INSIGHT
+    # -----------------------------
+    if neg_words:
+        top_issue = neg_words[0][0]
+        st.info(f"🧠 Insight: Most complaints are about '{top_issue}'.")
+else:
+    st.info("No data available for insights")
+
+# -----------------------------
+# BRAND COMPARISON SCORE
+# -----------------------------
+st.markdown("---")
+st.subheader("🏆 Brand Comparison Score")
+
+if not df.empty:
+
+    df_filtered = df.copy()
+    if selected_brand != "All" and "brand" in df.columns:
+        df_filtered = df_filtered[df_filtered["brand"] == selected_brand]
+
+    score_df = calculate_brand_scores(df_filtered)
+
+    if not score_df.empty:
+
+        # -----------------------------
+        # TABLE VIEW
+        # -----------------------------
+        st.dataframe(score_df, use_container_width=True)
+
+        # -----------------------------
+        # BAR CHART
+        # -----------------------------
+        import plotly.express as px
+
+        fig = px.bar(
+            score_df,
+            x="brand",
+            y="score",
+            color="score",
+            color_continuous_scale="RdYlGn",
+            title="Brand Sentiment Score Comparison"
+        )
+
+        st.plotly_chart(fig, use_container_width=True)
+
+        # -----------------------------
+        # INSIGHTS
+        # -----------------------------
+        best = score_df.iloc[0]
+        worst = score_df.iloc[-1]
+
+        st.success(f"🏆 Best Brand: {best['brand']} ({best['score']}%)")
+        st.error(f"⚠️ Worst Brand: {worst['brand']} ({worst['score']}%)")
+
+    else:
+        st.info("Not enough data for comparison")
+
+else:
+    st.warning("No data available")
 
 # users can export data for analysis
 #users can export data for analysis
