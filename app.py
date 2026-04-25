@@ -264,11 +264,12 @@ if not df.empty:
         brand = tweet.get("brand", "Unknown")
         date = tweet.get("created_at", datetime.now())
         
+        # FIXED: Dark background with white text for better visibility
         st.markdown(
             f"""
-            <div style="padding: 10px; border-left: 5px solid {color}; margin: 10px 0; background-color: #f8f9fa; border-radius: 5px;">
-                <small>{date} | {brand}</small>
-                <p style="margin: 5px 0;">{tweet['text'][:150]}...</p>
+            <div style="padding: 10px; border-left: 5px solid {color}; margin: 10px 0; background-color: #1a1a2e; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                <small style="color: #888888;">📅 {date} | 📱 {brand}</small>
+                <p style="margin: 8px 0; color: #ffffff; font-size: 14px; line-height: 1.4;">{tweet['text'][:200]}...</p>
                 <strong style="color: {color};">{emoji} {sentiment.upper()}</strong>
             </div>
             """,
