@@ -6,7 +6,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, classification_report
 
-from src.preprocess import clean_text
+from preprocess import clean_text
 
 # -----------------------------
 # 1. LOAD DATA
